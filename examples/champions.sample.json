@@ -1,0 +1,483 @@
+{
+  "source": "ESMO in-game capture",
+  "champion_count": 2,
+  "with_meta": 2,
+  "_note": "Trimmed sample: 2 of 72 champions, matchup lists cut to 2 each.",
+  "champions": [
+    {
+      "name": "Automata",
+      "class": "Battle Mage",
+      "class_description": "Short-range mages who wade into combat to deal sustained area-of-effect damage. They rely on high durability or healing to survive extended fights.",
+      "attack_type": "Ranged",
+      "damage_type": "Magic",
+      "base_health": "600 (+104/lvl)",
+      "base_resource": "418 (+25/lvl)",
+      "resource_type": "Mana",
+      "abilities": [
+        {
+          "slot": "Q",
+          "targeting": "Line skillshot",
+          "cooldown": "6s",
+          "range": 9.0,
+          "scaling": "60 (+35/lvl)",
+          "effects": [],
+          "raw": "Q\nLine skillshot\n60 (+35/lvl)\n6s\n9.0"
+        },
+        {
+          "slot": "W",
+          "targeting": "Point-targeted",
+          "cooldown": "10s",
+          "range": 9.0,
+          "scaling": "50 (+30/lvl) shield · 4.0s",
+          "effects": [
+            "Allies"
+          ],
+          "raw": "W\nPoint-targeted\nAllies\n50 (+30/lvl) shield · 4.0s\n10s\n9.0"
+        },
+        {
+          "slot": "E",
+          "targeting": "Line skillshot",
+          "cooldown": "8s",
+          "range": 9.0,
+          "scaling": "70 (+35/lvl)",
+          "effects": [
+            "Slow 35% · 1.50s"
+          ],
+          "raw": "E\nLine skillshot\n70 (+35/lvl)\nSlow 35% · 1.50s\n8s\n9.0"
+        },
+        {
+          "slot": "R",
+          "targeting": "Point-targeted",
+          "cooldown": "110s",
+          "range": 9.0,
+          "scaling": "200 (+100/lvl)",
+          "effects": [
+            "Stun 0.75s"
+          ],
+          "raw": "R\nPoint-targeted\n200 (+100/lvl)\nStun 0.75s\n110s\n9.0"
+        }
+      ],
+      "positions": [
+        {
+          "position": "Mid",
+          "period": "Aug 7 - Aug 14",
+          "pick_rate": 3.4,
+          "ban_rate": 3.9,
+          "win_rate": 43.7,
+          "wins": 166,
+          "losses": 214,
+          "games": 380,
+          "kda": 1.13,
+          "gold_per_min": 284.0,
+          "cs_per_min": 3.8,
+          "damage_per_min": 452.4,
+          "vision_per_game": 0.0,
+          "best_matchups": [
+            {
+              "opponent": "Chronos",
+              "win_rate": 80.0,
+              "games": 10
+            },
+            {
+              "opponent": "Cinder",
+              "win_rate": 72.7,
+              "games": 11
+            }
+          ],
+          "worst_matchups": [
+            {
+              "opponent": "Engineer",
+              "win_rate": 7.1,
+              "games": 28
+            },
+            {
+              "opponent": "Seeker",
+              "win_rate": 12.5,
+              "games": 16
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "period": "Aug 7 - Aug 14",
+        "pick_rate": 3.4,
+        "ban_rate": 3.9,
+        "win_rate": 43.7,
+        "wins": 166,
+        "losses": 214,
+        "games": 380,
+        "kda": 1.13,
+        "gold_per_min": 284.0,
+        "cs_per_min": 3.8,
+        "damage_per_min": 452.4,
+        "vision_per_game": 0.0,
+        "best_matchups": [
+          {
+            "opponent": "Chronos",
+            "win_rate": 80.0,
+            "games": 10
+          },
+          {
+            "opponent": "Cinder",
+            "win_rate": 72.7,
+            "games": 11
+          },
+          {
+            "opponent": "Brewer",
+            "win_rate": 66.7,
+            "games": 15
+          },
+          {
+            "opponent": "Usurper",
+            "win_rate": 61.1,
+            "games": 18
+          },
+          {
+            "opponent": "Pembroke",
+            "win_rate": 60.0,
+            "games": 15
+          }
+        ],
+        "worst_matchups": [
+          {
+            "opponent": "Engineer",
+            "win_rate": 7.1,
+            "games": 28
+          },
+          {
+            "opponent": "Seeker",
+            "win_rate": 12.5,
+            "games": 16
+          },
+          {
+            "opponent": "Oculus",
+            "win_rate": 16.7,
+            "games": 12
+          },
+          {
+            "opponent": "Stellar",
+            "win_rate": 20.0,
+            "games": 10
+          },
+          {
+            "opponent": "Umbra",
+            "win_rate": 23.5,
+            "games": 17
+          }
+        ]
+      },
+      "stats": {
+        "HEALTH": {
+          "HP": "600 (+104/lvl)",
+          "Regen / sec": "0.55 (+0.16/lvl)"
+        },
+        "RESOURCE (MANA)": {
+          "Pool": "418 (+25/lvl)",
+          "Regen / sec": "1.30 (+0.11/lvl)"
+        },
+        "ATTACK DAMAGE": {
+          "Damage": "56 (+3/lvl)"
+        },
+        "AUTO-ATTACK": {
+          "Speed": "0.658 (+0.035/lvl)",
+          "Bonus multiplier": "0.658",
+          "Range": "5.75",
+          "Windup": "0.30"
+        },
+        "ABILITY POWER": {
+          "AP": "0"
+        },
+        "CRIT": {
+          "Chance": "0%",
+          "Damage": "200%"
+        },
+        "ARMOR": {
+          "Armor": "25 (+4/lvl)"
+        },
+        "MAGIC RESIST": {
+          "MR": "30 (+1/lvl)"
+        },
+        "PENETRATION": {
+          "Armor (flat)": "0",
+          "Armor": "0%",
+          "Magic (flat)": "0",
+          "MR": "0%"
+        },
+        "OTHER": {
+          "Tenacity": "0%",
+          "Lifesteal": "0%",
+          "Omnivamp": "0%",
+          "Heal/Shield power": "0%",
+          "Ability haste": "0",
+          "Move speed": "325.00"
+        }
+      },
+      "portrait": "portraits/Automata.png",
+      "has_meta": true
+    },
+    {
+      "name": "Drowner",
+      "class": "Assassin",
+      "class_description": "Agile melee heroes who use high mobility to bypass frontlines and eliminate high-priority targets. They rely on defensive outplay mechanics to survive dangerous positioning.",
+      "attack_type": "Melee",
+      "damage_type": "Physical",
+      "base_health": "595 (+108/lvl)",
+      "base_resource": "400 (+30/lvl)",
+      "resource_type": "Mana",
+      "abilities": [
+        {
+          "slot": "Q",
+          "targeting": "Line skillshot",
+          "cooldown": "5.5s",
+          "range": 6.5,
+          "scaling": "70 (+30/lvl)",
+          "effects": [
+            "Pull 3.5 units"
+          ],
+          "raw": "Q\nLine skillshot\n70 (+30/lvl)\nPull 3.5 units\n5.5s\n6.5"
+        },
+        {
+          "slot": "W",
+          "targeting": "Dash",
+          "cooldown": "14s",
+          "range": 5.0,
+          "scaling": null,
+          "effects": [],
+          "raw": "W\nDash\n14s\n5.0"
+        },
+        {
+          "slot": "E",
+          "targeting": "Dash + hit",
+          "cooldown": "11s",
+          "range": 6.5,
+          "scaling": "80 (+35/lvl)",
+          "effects": [
+            "Slow 35% · 1.25s"
+          ],
+          "raw": "E\nDash + hit\n80 (+35/lvl)\nSlow 35% · 1.25s\n11s\n6.5"
+        },
+        {
+          "slot": "R",
+          "targeting": "Dash + hit",
+          "cooldown": "90s",
+          "range": 7.0,
+          "scaling": "250 (+100/lvl) · Execute below 50% HP",
+          "effects": [
+            "Stun 0.50s"
+          ],
+          "raw": "R\nDash + hit\n250 (+100/lvl) · Execute below 50% HP\nStun 0.50s\n90s\n7.0"
+        }
+      ],
+      "positions": [
+        {
+          "position": "Jungle",
+          "period": "Aug 7 - Aug 14",
+          "pick_rate": 29.4,
+          "ban_rate": 13.7,
+          "win_rate": 64.6,
+          "wins": 1323,
+          "losses": 725,
+          "games": 2048,
+          "kda": 2.02,
+          "gold_per_min": 237.6,
+          "cs_per_min": 2.0,
+          "damage_per_min": 593.1,
+          "vision_per_game": 0.0,
+          "best_matchups": [
+            {
+              "opponent": "Equinox",
+              "win_rate": 79.7,
+              "games": 64
+            },
+            {
+              "opponent": "Brewer",
+              "win_rate": 78.3,
+              "games": 46
+            }
+          ],
+          "worst_matchups": [
+            {
+              "opponent": "Nomad",
+              "win_rate": 50.0,
+              "games": 78
+            }
+          ]
+        },
+        {
+          "position": "Bot",
+          "period": "Aug 7 - Aug 14",
+          "pick_rate": 29.4,
+          "ban_rate": 13.7,
+          "win_rate": 46.9,
+          "wins": 227,
+          "losses": 257,
+          "games": 484,
+          "kda": 2.74,
+          "gold_per_min": 257.6,
+          "cs_per_min": 2.4,
+          "damage_per_min": 386.4,
+          "vision_per_game": 0.0,
+          "best_matchups": [
+            {
+              "opponent": "Torrent",
+              "win_rate": 75.0,
+              "games": 20
+            },
+            {
+              "opponent": "Pembroke",
+              "win_rate": 73.3,
+              "games": 15
+            }
+          ],
+          "worst_matchups": [
+            {
+              "opponent": "Blight",
+              "win_rate": 23.5,
+              "games": 17
+            },
+            {
+              "opponent": "Sniper",
+              "win_rate": 28.6,
+              "games": 42
+            }
+          ]
+        },
+        {
+          "position": "Support",
+          "period": "Aug 7 - Aug 14",
+          "pick_rate": 29.4,
+          "ban_rate": 13.7,
+          "win_rate": 60.4,
+          "wins": 433,
+          "losses": 284,
+          "games": 717,
+          "kda": 2.81,
+          "gold_per_min": 235.7,
+          "cs_per_min": 1.4,
+          "damage_per_min": 324.2,
+          "vision_per_game": 0.0,
+          "best_matchups": [
+            {
+              "opponent": "Chronos",
+              "win_rate": 81.3,
+              "games": 16
+            },
+            {
+              "opponent": "Gambler",
+              "win_rate": 80.0,
+              "games": 30
+            }
+          ],
+          "worst_matchups": [
+            {
+              "opponent": "Engineer",
+              "win_rate": 36.7,
+              "games": 49
+            },
+            {
+              "opponent": "Sentinel",
+              "win_rate": 44.2,
+              "games": 308
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "period": "Aug 7 - Aug 14",
+        "pick_rate": 29.4,
+        "ban_rate": 13.7,
+        "win_rate": 64.6,
+        "wins": 1323,
+        "losses": 725,
+        "games": 2048,
+        "kda": 2.02,
+        "gold_per_min": 237.6,
+        "cs_per_min": 2.0,
+        "damage_per_min": 593.1,
+        "vision_per_game": 0.0,
+        "best_matchups": [
+          {
+            "opponent": "Equinox",
+            "win_rate": 79.7,
+            "games": 64
+          },
+          {
+            "opponent": "Brewer",
+            "win_rate": 78.3,
+            "games": 46
+          },
+          {
+            "opponent": "Monk",
+            "win_rate": 77.3,
+            "games": 97
+          },
+          {
+            "opponent": "Gladiator",
+            "win_rate": 76.6,
+            "games": 77
+          },
+          {
+            "opponent": "Lupine",
+            "win_rate": 75.3,
+            "games": 77
+          }
+        ],
+        "worst_matchups": [
+          {
+            "opponent": "Nomad",
+            "win_rate": 50.0,
+            "games": 78
+          }
+        ]
+      },
+      "stats": {
+        "HEALTH": {
+          "HP": "595 (+108/lvl)",
+          "Regen / sec": "0.75 (+0.14/lvl)"
+        },
+        "RESOURCE (MANA)": {
+          "Pool": "400 (+30/lvl)",
+          "Regen / sec": "1.45 (+0.10/lvl)"
+        },
+        "ATTACK DAMAGE": {
+          "Damage": "64 (+3/lvl)"
+        },
+        "AUTO-ATTACK": {
+          "Speed": "0.660 (+0.025/lvl)",
+          "Bonus multiplier": "0.660",
+          "Range": "1.75",
+          "Windup": "0.30"
+        },
+        "ABILITY POWER": {
+          "AP": "0"
+        },
+        "CRIT": {
+          "Chance": "0%",
+          "Damage": "200%"
+        },
+        "ARMOR": {
+          "Armor": "28 (+4/lvl)"
+        },
+        "MAGIC RESIST": {
+          "MR": "30 (+2/lvl)"
+        },
+        "PENETRATION": {
+          "Armor (flat)": "0",
+          "Armor": "0%",
+          "Magic (flat)": "0",
+          "MR": "0%"
+        },
+        "OTHER": {
+          "Tenacity": "0%",
+          "Lifesteal": "0%",
+          "Omnivamp": "0%",
+          "Heal/Shield power": "0%",
+          "Ability haste": "0",
+          "Move speed": "350.00"
+        }
+      },
+      "portrait": "portraits/Drowner.png",
+      "has_meta": true
+    }
+  ]
+}

@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ESMO capture output
+esmo_capture*/
+esmo_explore*/
+champions*.json
+!examples/champions.sample.json
+*.zip
