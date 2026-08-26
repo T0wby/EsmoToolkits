@@ -1,5 +1,7 @@
 # ESMO data toolkit
 
+[![CI](https://github.com/T0wby/EsmoToolkits/actions/workflows/ci.yml/badge.svg)](https://github.com/T0wby/EsmoToolkits/actions/workflows/ci.yml)
+
 Extracts champion data from **ESMO: Esports Manager Online** — abilities, base stats, live
 win rates, matchups and portraits — into structured JSON.
 
