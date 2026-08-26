@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hierarchy rotation="0">
+  <node index="0" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Back" checkable="false" clickable="true" enabled="true" bounds="[40,40][140,100]" />
+  <node index="1" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Playbook" checkable="false" clickable="true" enabled="true" bounds="[160,40][360,100]" />
+  <node index="2" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Overview&#10;Tab 1 of 3" checkable="false" clickable="true" enabled="true" bounds="[700,120][900,190]" />
+  <node index="3" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Meta&#10;Tab 2 of 3" checkable="false" clickable="true" enabled="true" bounds="[910,120][1090,190]" />
+  <node index="4" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Automata" checkable="false" clickable="false" enabled="true" bounds="[380,220][700,290]" />
+  <node index="5" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Battle Mage&#10;Short-range mages who wade into combat to deal sustained area-of-effect damage. They rely on high durability or healing to survive extended fights." checkable="false" clickable="false" enabled="true" bounds="[815,384][1847,587]" />
+  <node index="6" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Ranged" checkable="false" clickable="false" enabled="true" bounds="[380,620][520,675]" />
+  <node index="7" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Magic" checkable="false" clickable="false" enabled="true" bounds="[540,620][680,675]" />
+  <node index="8" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="600 (+104/lvl)" checkable="false" clickable="false" enabled="true" bounds="[380,700][700,755]" />
+  <node index="9" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="418 (+25/lvl) Mana" checkable="false" clickable="false" enabled="true" bounds="[380,770][760,825]" />
+  <node index="10" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="Q&#10;Line skillshot&#10;60 (+35/lvl)&#10;6s&#10;9.0" checkable="false" clickable="true" enabled="true" bounds="[380,860][1840,980]" />
+  <node index="11" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="W&#10;Point-targeted&#10;Allies&#10;50 (+30/lvl) shield · 4.0s&#10;10s&#10;9.0" checkable="false" clickable="true" enabled="true" bounds="[380,990][1840,1110]" />
+  <node index="12" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="E&#10;Line skillshot&#10;70 (+35/lvl)&#10;Slow 35% · 1.50s&#10;8s&#10;9.0" checkable="false" clickable="true" enabled="true" bounds="[380,1120][1840,1240]" />
+  <node index="13" text="" resource-id="" class="android.view.View" package="com.esmo.game" content-desc="R&#10;Point-targeted&#10;200 (+100/lvl)&#10;Stun 0.75s&#10;110s&#10;9.0" checkable="false" clickable="true" enabled="true" bounds="[380,1250][1840,1370]" />
+  <node index="99" text="" class="android.widget.FrameLayout" content-desc="" bounds="[0,0][1920,1080]" />
+  <node index="100" text="" class="android.view.View" content-desc="Ranged" bounds="" />
+</hierarchy>
