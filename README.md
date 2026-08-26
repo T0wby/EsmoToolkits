@@ -13,6 +13,7 @@ Built and validated against **app v0.85.2**, 72 champions, 106 champion-position
 EsmoToolkits/
 ├── README.md                      this file — setup, per-script guides, data schema
 ├── requirements.txt
+├── pyproject.toml                 packaging — `pip install .` for the esmo-* commands
 ├── docs/
 │   └── EXTRACTION-GUIDE.md        how the technique works, and how to extend it
 ├── scripts/
@@ -71,7 +72,7 @@ address it shows (e.g. `127.0.0.1:5555`); newer builds randomise the port.
 unzipped somewhere permanent, or BlueStacks' own copy at
 `C:\Program Files\BlueStacks_nxt\HD-Adb.exe`. The scripts find either automatically.
 
-**4. Python 3.8+** and one dependency:
+**4. Python 3.9+** and one dependency:
 
 ```powershell
 pip install -r requirements.txt      # Pillow, for portrait cropping and icon-state reading
@@ -79,6 +80,15 @@ pip install -r requirements.txt      # Pillow, for portrait cropping and icon-st
 
 Pillow is optional — without it you lose portraits and position detection falls back to a
 less reliable method. Install it.
+
+Or install the toolkit itself, which pulls in Pillow and adds the commands
+`esmo-capture`, `esmo-parse` and `esmo-explore` to your PATH:
+
+```powershell
+pip install .          # add -e for an editable install
+```
+
+Every `python scripts/x.py` below then also works as the matching command.
 
 **While a capture runs:** leave the BlueStacks window **restored, not minimised**. Input
 injection doesn't need focus, so you can use your PC normally, but a minimised emulator can

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "esmo-toolkit"
+version = "0.1.0"
+description = "Extract champion data from ESMO: Esports Manager Online via the Android accessibility tree"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Tobias" }]
+dependencies = ["Pillow>=9.0"]
+
+[project.urls]
+Homepage = "https://github.com/T0wby/EsmoToolkits"
+
+[project.scripts]
+esmo-capture = "esmo_capture:main"
+esmo-parse = "parse_esmo:main"
+esmo-explore = "esmo_explore:main"
+
+[tool.setuptools]
+package-dir = { "" = "scripts" }
+py-modules = ["esmo_capture", "parse_esmo", "esmo_explore"]
