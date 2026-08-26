@@ -887,8 +887,8 @@ def main():
                     help="measure the position selector on the currently open champion")
     ap.add_argument("--redo", metavar="NAMES",
                     help="comma-separated champion names to re-capture; their "
-                         "existing data is discarded first. Use with --resume "
-                         "to fix a handful without redoing the roster.")
+                         "existing data is discarded first. Implies --resume, "
+                         "so the rest of the roster is skipped.")
     ap.add_argument("--phase", choices=["top", "bottom", "both"], default="both",
                     help="which grid scroll position to walk; 'bottom' reaches the "
                          "last rows without re-visiting the first ones")
@@ -939,6 +939,13 @@ def main():
     state_path = OUT / "captured.json"
     captured, cells = {}, {}
     cells_trusted, skipped = True, 0
+    # --redo only makes sense against an existing state file: it drops those names
+    # from the skip list so they get walked again. Without --resume the skip list
+    # is empty, so the run would restart at the first champion AND overwrite
+    # captured.json with nothing. Imply it rather than doing either.
+    if args.redo and not args.resume:
+        args.resume = True
+        print("--redo implies --resume")
     if args.resume and state_path.exists():
         _state = json.loads(state_path.read_text())
         captured = {c["name"]: c for c in _state["champions"]}

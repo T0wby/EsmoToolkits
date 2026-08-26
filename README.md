@@ -396,7 +396,8 @@ older meta is never mistaken for fresh.
 python scripts/esmo_capture.py --resume --redo Brewer,Nomad,Volt
 ```
 
-Keep `--resume`, and match `--range` to the folder you're patching.
+`--redo` implies `--resume` — the named champions are re-walked and the rest of the
+roster is skipped. Match `--range` to the folder you're patching.
 
 ---
 
