@@ -177,8 +177,8 @@ def connect(adb, port=None):
     for p in ([port] if port else CANDIDATE_PORTS):
         adb.run("connect", f"127.0.0.1:{p}", timeout=15)
     _, out, _ = adb.run("devices")
-    return [l.split("\t")[0].strip() for l in out.splitlines()[1:]
-            if "\t" in l and l.split("\t")[1].strip() == "device"]
+    return [ln.split("\t")[0].strip() for ln in out.splitlines()[1:]
+            if "\t" in ln and ln.split("\t")[1].strip() == "device"]
 
 
 # ---------------------------------------------------------------- ui dumping

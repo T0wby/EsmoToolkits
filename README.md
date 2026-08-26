@@ -20,8 +20,10 @@ EsmoToolkits/
 │   ├── esmo_capture.py            walks the champion roster, saves raw dumps
 │   ├── parse_esmo.py              turns raw dumps into champions.json
 │   └── esmo_explore.py            maps any other page in the game
-└── examples/
-    └── champions.sample.json      2 champions, so you can see the output shape
+├── examples/
+│   └── champions.sample.json      2 champions, so you can see the output shape
+└── tests/
+    └── test_parse.py              offline parser checks — no emulator needed
 ```
 
 ---
@@ -89,6 +91,9 @@ pip install .          # add -e for an editable install
 ```
 
 Every `python scripts/x.py` below then also works as the matching command.
+
+The parser has offline tests that need no emulator — `pip install -e ".[dev]"`, then
+`ruff check .` and `pytest -q`. CI runs both on 3.9 and 3.13.
 
 **While a capture runs:** leave the BlueStacks window **restored, not minimised**. Input
 injection doesn't need focus, so you can use your PC normally, but a minimised emulator can

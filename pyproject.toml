@@ -24,3 +24,14 @@ esmo-explore = "esmo_explore:main"
 [tool.setuptools]
 package-dir = { "" = "scripts" }
 py-modules = ["esmo_capture", "parse_esmo", "esmo_explore"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# Real errors only — pyflakes plus the syntax/runtime pycodestyle rules.
+# The scripts are deliberately terse; style rules would be noise.
+select = ["E4", "E7", "E9", "F"]
