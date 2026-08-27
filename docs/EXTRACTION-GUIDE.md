@@ -137,7 +137,18 @@ capture dates in one dataset invisibly.
 **Rule: purge before capture, sweep the whole folder at startup, and have the parser treat
 the run manifest as the authority on what should exist.**
 
-**6. Capture raw, parse separately.**
+**6. Absent data is not absent structure.**
+A position the champion plays but has no games in during the window renders "Not enough
+data": no win/loss block, so nothing to fingerprint a state change with. Both the capture
+loop and the parser used the presence of numbers to decide the position existed, so a 24h
+scan quietly lost one position each for five champions.
+
+**Rule: read structure from something other than the data itself.** The game states the
+positions twice more, and the capture already saves both: the icon row under the champion
+name has one icon per playable position, and the selector strip draws them lit. Neither
+needs a re-capture, and each vetoes the other when a frame is caught mid-repaint.
+
+**7. Capture raw, parse separately.**
 The single most valuable structural decision. `esmo_capture.py` saves raw XML;
 `parse_esmo.py` converts it offline. Every parsing bug since has been fixed in seconds by
 re-running the parser, instead of repeating a 3-hour walk. Several datasets were fully
