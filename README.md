@@ -9,7 +9,7 @@ ESMO is a mobile-only game with no public API. This toolkit runs the app in an A
 emulator and reads its **accessibility tree**, which Flutter apps publish in full. That
 means exact text, not OCR: every number you see below came out of the app as a string.
 
-Built and validated against **app v0.85.2**, 72 champions, 106 champion-positions.
+Built and validated against **app v1.1.4**, 72 champions, 105 champion-positions.
 
 ```
 EsmoToolkits/
@@ -434,7 +434,7 @@ rather than finishing quietly; re-run with `--resume --phase bottom`.
 - The **early-game advantages chart** — its accessibility label gives the axes
   (`0m…20m`, `Gold`, `CS`, `XP`) but no plotted values
 
-**Fragile to app updates.** Coordinates were measured on v0.85.2 at 1920×1080. A UI redesign
+**Fragile to app updates.** Coordinates were measured on v1.1.4 at 1920×1080. A UI redesign
 means re-mapping with `esmo_explore.py`. Text-labelled controls are matched by their text
 and survive layout changes; icon-only controls are not.
 
