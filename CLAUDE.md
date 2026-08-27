@@ -44,11 +44,32 @@ Pipeline:
   `esmo_capture/` (`raw/<Champion>/*.xml`, `portraits/`, `captured.json`).
 - `parse_esmo.py` - reads that folder, emits `champions.json`.
 - `esmo.py` - preset launcher; `PRESETS`/`DESCRIPTIONS` map a name to capture flags, then runs
-  capture and parse in sequence.
+  capture and parse in sequence. Also the home of every pure function the GUI needs.
+- `esmo_gui.py` - a Tkinter window over `esmo.py`. It builds an `esmo.py` argv and spawns it
+  in a new console (`CREATE_NEW_CONSOLE`, via `getattr` so non-Windows degrades to a normal
+  spawn); it never captures or parses itself.
 
 Both capture and explore anchor output at `pathlib.Path.cwd()`, not next to the script - an
 installed copy lives in site-packages. `esmo.py:CAPTURE_DIR` must stay in sync with
-`esmo_capture.py:OUT`; a test asserts it.
+`esmo_capture.py:OUT`; a test asserts it. The GUI's "capture folder" field is passed as the
+subprocess `cwd`, which is the only reason a window launched from a shortcut captures
+anywhere sensible.
+
+`~/.esmo.json` holds user presets (layered over the built-in `PRESETS`, config wins on a name
+clash) and, under `state`, the GUI's memory of its own widgets. A missing or malformed file is
+never fatal - `load_config` returns `{}`.
+
+Two rules keep the GUI honest, both learned by getting them wrong first:
+- **Widgets are the truth.** The GUI passes flags but *not* the preset name, because
+  `esmo.py` puts preset flags first, so naming the preset too would re-add a flag you had
+  just unticked.
+- **The preview is the filename.** The GUI resolves the pattern itself and passes a literal
+  `--out`, so what the window shows is what gets written.
+
+`esmo.py` also takes the preset name off argv itself (`take_preset`) rather than letting
+argparse do it: an optional positional next to unknown flags claims the *value* of the first
+flag it doesn't recognise, so `esmo.py --range 14d` would otherwise look for a preset called
+`14d`.
 
 `captured.json` is the manifest and the authority: which champions were captured, which
 positions each really has, and which grid cell each sits in. The parser uses it to ignore
@@ -87,3 +108,5 @@ survives layout changes; hardcoded coordinates do not.
 - Prose in README and docs avoids em-dashes.
 - Tests are pure and offline - they build command lines, parse fixture XML, and round-trip
   `examples/champions.sample.json`. Anything needing adb is not unit-testable here.
+- Nothing testable lives in `esmo_gui.py`. `settings_to_args` / `args_to_settings` (widget
+  state <-> argv, inverses of each other) sit in `esmo.py` so the suite never imports tkinter.

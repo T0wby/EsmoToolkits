@@ -140,15 +140,70 @@ python scripts/esmo.py                       # pick from a menu
 | `quick` | `--no-meta --resume --scroll-method pagekeys` |
 | `fresh` | `--range 7d --scroll-method pagekeys` |
 
-Anything after the preset is passed straight to `esmo_capture.py`, so one-offs still work:
+Anything after the preset is passed straight to `esmo_capture.py`, and anything after a
+bare `--` goes to `parse_esmo.py` instead, so both halves of the run are reachable:
 
 ```powershell
 python scripts/esmo.py weekly --redo Brewer,Nomad
 python scripts/esmo.py weekly --port 5555 --limit 3
+python scripts/esmo.py quick -- --merge last-week.json
 python scripts/esmo.py weekly -n             # print the commands, run nothing
 ```
 
-Add your own by editing `PRESETS` at the top of [scripts/esmo.py](scripts/esmo.py).
+Flags you pass override the preset's own, so `esmo.py weekly --range 14d` is a 14-day
+weekly. Give flags with no preset name and the run uses exactly those flags.
+
+### Naming the output
+
+`--pattern` names the parsed file; `--out` sets a literal path and ignores the pattern.
+Placeholders are `{date}`, `{preset}` and `{range}`, and a typo in one stops the run
+before the capture starts rather than three hours later.
+
+```powershell
+python scripts/esmo.py weekly --pattern "{date}_{range}.json"
+python scripts/esmo.py weekly --out C:\captures\patch-3.7.json
+python scripts/esmo.py weekly --parse-only   # re-parse, no capture
+```
+
+### Your own presets
+
+Add them to `~/.esmo.json`, which layers over the built-ins and wins on a name clash.
+Both the CLI and the window read it, so a preset saved in one is available in the other.
+
+```json
+{
+  "pattern": "{date}_{range}.json",
+  "presets": {
+    "biweekly": {
+      "capture": ["--range", "14d", "--resume", "--scroll-method", "pagekeys"],
+      "parse": ["--strict-period"],
+      "description": "14-day meta"
+    }
+  }
+}
+```
+
+The built-in five still live in `PRESETS` at the top of [scripts/esmo.py](scripts/esmo.py).
+
+### The window
+
+`esmo_gui.py` is the same launcher with widgets: pick the capture folder, set the flags,
+watch the output filename update, press Launch.
+
+```powershell
+python scripts/esmo_gui.py
+```
+
+The run opens in its own console and behaves exactly as it does from the command line,
+because it is the command line - the window only builds an `esmo.py` invocation and
+spawns it. **Show command** prints what it will run; **Save as...** writes the current
+settings to `~/.esmo.json` as a named preset; **Parse only** re-parses a folder you have
+already captured. Loading a preset fills the widgets, and from then on the widgets win,
+so unticking something the preset sets does what it looks like it does.
+
+The **capture folder** field is the working directory of the run: `esmo_capture/` is
+created inside it. Set it, or a window launched from a shortcut captures into wherever
+that shortcut happened to point.
 
 ---
 

@@ -21,10 +21,11 @@ esmo = "esmo:main"
 esmo-capture = "esmo_capture:main"
 esmo-parse = "parse_esmo:main"
 esmo-explore = "esmo_explore:main"
+esmo-gui = "esmo_gui:main"
 
 [tool.setuptools]
 package-dir = { "" = "scripts" }
-py-modules = ["esmo", "esmo_capture", "parse_esmo", "esmo_explore"]
+py-modules = ["esmo", "esmo_gui", "esmo_capture", "parse_esmo", "esmo_explore"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "ruff>=0.6"]
