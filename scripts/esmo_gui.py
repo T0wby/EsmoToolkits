@@ -38,6 +38,144 @@ FIELDS = ("range", "phase", "scroll_method", "limit", "port", "extra",
           "merge", "parse_extra")
 CHECKS = ("resume", "no_meta", "no_roles", "strict_period")
 
+PAD = dict(padx=6, pady=3, sticky="w")
+
+# Hover text. Every one ends in a concrete example, because the flag names alone are the
+# thing you cannot remember without opening the README - which is the reason this window
+# exists at all.
+TIPS = {
+    "workdir":
+        "Working directory of the run. esmo_capture/ is created inside it, and\n"
+        "'Parse only' reads it. Set this: a window opened from a shortcut would\n"
+        "otherwise capture into whatever folder the shortcut points at.\n\n"
+        "Example:  D:\\captures",
+    "preset":
+        "A named set of flags, from esmo.py and ~/.esmo.json.\n"
+        "'Load' fills the fields below from it; from then on the fields win, so\n"
+        "unticking something the preset sets does what it looks like it does.\n"
+        "'Save as...' writes the current fields back as a new preset, which\n"
+        "`python scripts/esmo.py <name>` can then run too.\n\n"
+        "Example:  weekly",
+    "range":
+        "--range. The Meta tab's date window. Re-applied for every champion,\n"
+        "because the app forgets it each time one is opened.\n"
+        "'any' needs a subscription. 'none' leaves the app's own 28-day window.\n"
+        "Shorter windows mean smaller matchup samples.\n\n"
+        "Example:  7d",
+    "phase":
+        "--phase. Which grid scroll position to walk.\n"
+        "'bottom' reaches the last rows without re-walking the first ones, which\n"
+        "is what you want when a run stopped short of the full roster.\n\n"
+        "Example:  both",
+    "scroll_method":
+        "--scroll-method. The gesture used to scroll inside the app.\n"
+        "'pagekeys' is the one that works: input swipe does not move Flutter's\n"
+        "scroll view under BlueStacks at all. Blank means autodetect, which\n"
+        "tries each gesture until one visibly moves content.\n\n"
+        "Example:  pagekeys",
+    "limit":
+        "--limit. Stop after this many champions.\n"
+        "Always run a small one first and check the positions and the\n"
+        "'date range applied:' line before committing three hours.\n\n"
+        "Example:  3",
+    "port":
+        "--port. ADB port of the emulator. Blank autodetects, which is usually\n"
+        "right; set it if the run reports 'No adb device'.\n\n"
+        "Example:  5555",
+    "resume":
+        "--resume. Skip champions already captured in this folder - but only when\n"
+        "what is on disk covers what this run wants, so a --no-meta pass followed\n"
+        "by a full pass correctly re-visits everything.\n\n"
+        "Leave it on for a repeat run; turn it off to walk the whole roster fresh.",
+    "no_meta":
+        "--no-meta. Skip the Meta tab entirely: abilities, base stats and\n"
+        "portraits only, about 15 minutes instead of three hours.\n\n"
+        "Follow it later with a full run, or fill the gap with 'Merge from'.",
+    "no_roles":
+        "--no-roles. Capture only the position the app opens on, instead of every\n"
+        "position a champion plays. Faster, and loses the per-position win rates,\n"
+        "KDA and matchups that are most of the point.",
+    "extra":
+        "Anything else esmo_capture.py accepts, passed through verbatim.\n"
+        "Quote paths containing spaces.\n\n"
+        "Examples:  --redo Brewer,Nomad\n"
+        "           --pull-apk\n"
+        "           --adb \"C:\\platform-tools\\adb.exe\"",
+    "merge":
+        "--merge. Fill positions and meta from an existing champions.json, for\n"
+        "champions this capture took without meta. The follow-up to a --no-meta\n"
+        "run: capture the fast half now, borrow last week's meta for the rest.\n\n"
+        "Example:  20260820_champions.json",
+    "strict_period":
+        "--strict-period. Drop any position whose date window differs from the\n"
+        "majority, so one file never mixes two capture dates.\n\n"
+        "Turn it on when the parser reports MIXED WINDOWS.",
+    "parse_extra":
+        "Anything else parse_esmo.py accepts, passed through verbatim.\n\n"
+        "Example:  --dir other-capture-folder",
+    "out_dir":
+        "Where the parsed JSON lands. Blank means the capture folder above.\n\n"
+        "Example:  D:\\captures\\history",
+    "pattern":
+        "Name of the parsed file. Placeholders: {date} {preset} {range}.\n"
+        "A typo shows up in the preview below rather than three hours from now.\n\n"
+        "Examples:  {date}_champions.json   ->  20260827_champions.json\n"
+        "           {date}_{range}.json     ->  20260827_7d.json\n"
+        "           patch-3.7.json          ->  patch-3.7.json",
+    "preview":
+        "Exactly what will be written. The run is launched with this literal\n"
+        "path, so this is the filename, not a guess at it.",
+    "launch":
+        "Capture, then parse, in a new console window.\n"
+        "Ctrl+C in that console stops a capture; tick --resume to pick it up\n"
+        "where it left off. This window can be closed while the run continues.",
+    "parse_only":
+        "Re-parse the capture folder without capturing anything. Takes seconds\n"
+        "and is safe to repeat, which is the whole reason capture and parse are\n"
+        "separate steps.",
+    "show":
+        "Print the esmo.py command this window would run, without running it.\n"
+        "The same command works from a terminal, unchanged.",
+}
+
+
+class Tip:
+    """Hover text. tkinter ships no tooltip widget, and idlelib's is explicitly not a
+    public API, so this is the fifteen lines it takes to depend on neither."""
+
+    def __init__(self, widget, text, delay=400):
+        self.widget, self.text, self.delay = widget, text, delay
+        self.win = self.pending = None
+        widget.bind("<Enter>", self.schedule, add="+")
+        widget.bind("<Leave>", self.hide, add="+")
+        widget.bind("<ButtonPress>", self.hide, add="+")
+
+    def schedule(self, _=None):
+        self.cancel()
+        self.pending = self.widget.after(self.delay, self.show)
+
+    def cancel(self):
+        if self.pending:
+            self.widget.after_cancel(self.pending)
+            self.pending = None
+
+    def show(self):
+        if self.win:
+            return
+        self.win = tk.Toplevel(self.widget)
+        self.win.wm_overrideredirect(True)
+        self.win.wm_geometry("+%d+%d" % (self.widget.winfo_rootx() + 18,
+                                         self.widget.winfo_rooty()
+                                         + self.widget.winfo_height() + 4))
+        tk.Label(self.win, text=self.text, justify="left", background="#ffffe0",
+                 relief="solid", borderwidth=1, padx=7, pady=5).pack()
+
+    def hide(self, _=None):
+        self.cancel()
+        if self.win:
+            self.win.destroy()
+            self.win = None
+
 
 class App:
     def __init__(self, root):
@@ -60,97 +198,111 @@ class App:
         self.refresh()
 
     # ------------------------------------------------------------ layout
+    def _row(self, f, row, label, widget, key, span=2):
+        """One label + control, both carrying the same hover text."""
+        lab = ttk.Label(f, text=label)
+        lab.grid(row=row, column=0, **PAD)
+        widget.grid(row=row, column=1, columnspan=span, **PAD)
+        Tip(lab, TIPS[key])
+        Tip(widget, TIPS[key])
+        return row + 1
+
     def _layout(self):
-        pad = dict(padx=6, pady=3, sticky="w")
         f = ttk.Frame(self.root, padding=10)
         f.grid(sticky="nsew")
         row = 0
 
-        ttk.Label(f, text="Capture folder").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.workdir, width=44).grid(row=row, column=1, columnspan=2, **pad)
-        ttk.Button(f, text="Browse", command=self.pick_workdir).grid(row=row, column=3, **pad)
-        row += 1
-        ttk.Label(f, text="esmo_capture/ is created inside it", foreground="grey").grid(
-            row=row, column=1, columnspan=2, **pad)
+        row = self._row(f, row, "Capture folder",
+                        ttk.Entry(f, textvariable=self.workdir, width=44), "workdir")
+        browse = ttk.Button(f, text="Browse", command=self.pick_workdir)
+        browse.grid(row=row - 1, column=3, **PAD)
+        Tip(browse, TIPS["workdir"])
+        hint = ttk.Label(f, text="esmo_capture/ is created inside it", foreground="grey")
+        hint.grid(row=row, column=1, columnspan=2, **PAD)
+        Tip(hint, TIPS["workdir"])
         row += 1
 
         presets = esmo.load_presets(self.cfg)
-        ttk.Label(f, text="Preset").grid(row=row, column=0, **pad)
         box = ttk.Combobox(f, textvariable=self.preset, values=list(presets), width=18)
-        box.grid(row=row, column=1, **pad)
         box.bind("<<ComboboxSelected>>", self.load_preset)
-        ttk.Button(f, text="Load", command=self.load_preset).grid(row=row, column=2, **pad)
-        ttk.Button(f, text="Save as...", command=self.save_preset).grid(row=row, column=3, **pad)
-        row += 1
+        row = self._row(f, row, "Preset", box, "preset", span=1)
+        for col, (text, cmd) in enumerate((("Load", self.load_preset),
+                                           ("Save as...", self.save_preset)), start=2):
+            b = ttk.Button(f, text=text, command=cmd)
+            b.grid(row=row - 1, column=col, **PAD)
+            Tip(b, TIPS["preset"])
 
-        ttk.Separator(f, orient="horizontal").grid(row=row, column=0, columnspan=4,
-                                                   sticky="ew", pady=8)
-        row += 1
+        row = self._separator(f, row)
 
         for label, field, values in (("Date range", "range", RANGES),
                                      ("Grid phase", "phase", PHASES),
                                      ("Scroll method", "scroll_method", SCROLLS)):
-            ttk.Label(f, text=label).grid(row=row, column=0, **pad)
-            ttk.Combobox(f, textvariable=self.var[field], values=values,
-                         width=18).grid(row=row, column=1, **pad)
-            row += 1
+            row = self._row(f, row, label,
+                            ttk.Combobox(f, textvariable=self.var[field], values=values,
+                                         width=18), field, span=1)
 
         for label, field in (("Limit", "limit"), ("ADB port", "port")):
-            ttk.Label(f, text=label).grid(row=row, column=0, **pad)
-            ttk.Entry(f, textvariable=self.var[field], width=20).grid(row=row, column=1, **pad)
-            row += 1
+            row = self._row(f, row, label,
+                            ttk.Entry(f, textvariable=self.var[field], width=20), field, span=1)
 
         checks = ttk.Frame(f)
         checks.grid(row=row, column=0, columnspan=4, sticky="w", padx=6)
         for i, (label, field) in enumerate((("--resume", "resume"), ("--no-meta", "no_meta"),
                                             ("--no-roles", "no_roles"))):
-            ttk.Checkbutton(checks, text=label, variable=self.var[field]).grid(
-                row=0, column=i, padx=6)
+            c = ttk.Checkbutton(checks, text=label, variable=self.var[field])
+            c.grid(row=0, column=i, padx=6)
+            Tip(c, TIPS[field])
         row += 1
 
-        ttk.Label(f, text="Extra capture flags").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.var["extra"], width=44).grid(
-            row=row, column=1, columnspan=3, **pad)
+        row = self._row(f, row, "Extra capture flags",
+                        ttk.Entry(f, textvariable=self.var["extra"], width=44), "extra", span=3)
+
+        row = self._separator(f, row)
+
+        row = self._row(f, row, "Merge from",
+                        ttk.Entry(f, textvariable=self.var["merge"], width=44), "merge")
+        browse = ttk.Button(f, text="Browse", command=self.pick_merge)
+        browse.grid(row=row - 1, column=3, **PAD)
+        Tip(browse, TIPS["merge"])
+
+        strict = ttk.Checkbutton(f, text="--strict-period", variable=self.var["strict_period"])
+        strict.grid(row=row, column=1, **PAD)
+        Tip(strict, TIPS["strict_period"])
         row += 1
 
-        ttk.Separator(f, orient="horizontal").grid(row=row, column=0, columnspan=4,
-                                                   sticky="ew", pady=8)
-        row += 1
+        row = self._row(f, row, "Extra parse flags",
+                        ttk.Entry(f, textvariable=self.var["parse_extra"], width=44),
+                        "parse_extra", span=3)
 
-        ttk.Label(f, text="Merge from").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.var["merge"], width=44).grid(
-            row=row, column=1, columnspan=2, **pad)
-        ttk.Button(f, text="Browse", command=self.pick_merge).grid(row=row, column=3, **pad)
-        row += 1
-        ttk.Checkbutton(f, text="--strict-period", variable=self.var["strict_period"]).grid(
-            row=row, column=1, **pad)
-        row += 1
-        ttk.Label(f, text="Extra parse flags").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.var["parse_extra"], width=44).grid(
-            row=row, column=1, columnspan=3, **pad)
-        row += 1
+        row = self._separator(f, row)
 
-        ttk.Separator(f, orient="horizontal").grid(row=row, column=0, columnspan=4,
-                                                   sticky="ew", pady=8)
-        row += 1
+        row = self._row(f, row, "Output folder",
+                        ttk.Entry(f, textvariable=self.out_dir, width=44), "out_dir")
+        browse = ttk.Button(f, text="Browse", command=self.pick_outdir)
+        browse.grid(row=row - 1, column=3, **PAD)
+        Tip(browse, TIPS["out_dir"])
 
-        ttk.Label(f, text="Output folder").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.out_dir, width=44).grid(row=row, column=1, columnspan=2, **pad)
-        ttk.Button(f, text="Browse", command=self.pick_outdir).grid(row=row, column=3, **pad)
-        row += 1
-        ttk.Label(f, text="Filename").grid(row=row, column=0, **pad)
-        ttk.Entry(f, textvariable=self.pattern, width=44).grid(row=row, column=1, columnspan=3, **pad)
-        row += 1
-        ttk.Label(f, textvariable=self.preview, foreground="grey").grid(
-            row=row, column=1, columnspan=3, **pad)
+        row = self._row(f, row, "Filename",
+                        ttk.Entry(f, textvariable=self.pattern, width=44), "pattern", span=3)
+
+        preview = ttk.Label(f, textvariable=self.preview, foreground="grey")
+        preview.grid(row=row, column=1, columnspan=3, **PAD)
+        Tip(preview, TIPS["preview"])
         row += 1
 
         buttons = ttk.Frame(f)
         buttons.grid(row=row, column=0, columnspan=4, pady=(12, 0))
-        ttk.Button(buttons, text="Launch", command=self.launch).grid(row=0, column=0, padx=6)
-        ttk.Button(buttons, text="Parse only", command=self.parse_only).grid(row=0, column=1, padx=6)
-        ttk.Button(buttons, text="Show command", command=self.show_command).grid(
-            row=0, column=2, padx=6)
+        for col, (text, cmd, key) in enumerate((("Launch", self.launch, "launch"),
+                                                ("Parse only", self.parse_only, "parse_only"),
+                                                ("Show command", self.show_command, "show"))):
+            b = ttk.Button(buttons, text=text, command=cmd)
+            b.grid(row=0, column=col, padx=6)
+            Tip(b, TIPS[key])
+
+    def _separator(self, f, row):
+        ttk.Separator(f, orient="horizontal").grid(row=row, column=0, columnspan=4,
+                                                   sticky="ew", pady=8)
+        return row + 1
 
     # ------------------------------------------------------------ state
     def settings(self):

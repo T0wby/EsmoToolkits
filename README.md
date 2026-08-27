@@ -201,6 +201,9 @@ settings to `~/.esmo.json` as a named preset; **Parse only** re-parses a folder 
 already captured. Loading a preset fills the widgets, and from then on the widgets win,
 so unticking something the preset sets does what it looks like it does.
 
+Every label, field and button has hover text explaining the flag behind it and giving a
+concrete example, so the window doubles as the flag reference.
+
 The **capture folder** field is the working directory of the run: `esmo_capture/` is
 created inside it. Set it, or a window launched from a shortcut captures into wherever
 that shortcut happened to point.
