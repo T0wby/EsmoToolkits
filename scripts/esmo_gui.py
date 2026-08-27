@@ -16,9 +16,11 @@ args_to_settings, build), which is what keeps it testable without opening a wind
 """
 
 import datetime
+import os
 import pathlib
 import subprocess
 import sys
+import webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
@@ -28,6 +30,8 @@ import esmo  # noqa: E402
 # Windows opens the run in its own console. Everywhere else this is 0 and output goes to
 # whatever terminal launched the window, which is what the CLI does anyway.
 NEW_CONSOLE = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
+
+REPO = "https://github.com/T0wby/EsmoToolkits#readme"
 
 RANGES = ["", "24h", "7d", "28d", "any", "none"]
 PHASES = ["", "both", "top", "bottom"]
@@ -136,6 +140,10 @@ TIPS = {
     "show":
         "Print the esmo.py command this window would run, without running it.\n"
         "The same command works from a terminal, unchanged.",
+    "readme":
+        "Open README.md: the full flag reference, the output schema and the\n"
+        "troubleshooting list. Falls back to the project page on GitHub when the\n"
+        "toolkit was pip-installed and has no README beside it.",
 }
 
 
@@ -285,7 +293,8 @@ class App:
         row = self._row(f, row, "Filename",
                         ttk.Entry(f, textvariable=self.pattern, width=44), "pattern", span=3)
 
-        preview = ttk.Label(f, textvariable=self.preview, foreground="grey")
+        # wraplength, or a long capture path stretches the whole window to fit on one line
+        preview = ttk.Label(f, textvariable=self.preview, foreground="grey", wraplength=430)
         preview.grid(row=row, column=1, columnspan=3, **PAD)
         Tip(preview, TIPS["preview"])
         row += 1
@@ -294,7 +303,8 @@ class App:
         buttons.grid(row=row, column=0, columnspan=4, pady=(12, 0))
         for col, (text, cmd, key) in enumerate((("Launch", self.launch, "launch"),
                                                 ("Parse only", self.parse_only, "parse_only"),
-                                                ("Show command", self.show_command, "show"))):
+                                                ("Show command", self.show_command, "show"),
+                                                ("README", self.open_readme, "readme"))):
             b = ttk.Button(buttons, text=text, command=cmd)
             b.grid(row=0, column=col, padx=6)
             Tip(b, TIPS[key])
@@ -416,6 +426,17 @@ class App:
 
     def show_command(self):
         messagebox.showinfo("Command", " ".join(self.command()))
+
+    def open_readme(self):
+        """Hand README.md to whatever the system opens .md with. A pip-installed copy
+        sits in site-packages with no README beside it, so that case goes to GitHub."""
+        readme = esmo.HERE.parent / "README.md"
+        if not readme.exists():
+            webbrowser.open(REPO)
+        elif hasattr(os, "startfile"):     # Windows: use the file association
+            os.startfile(readme)
+        else:
+            webbrowser.open(readme.as_uri())
 
 
 def main():
