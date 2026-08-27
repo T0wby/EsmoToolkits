@@ -312,6 +312,60 @@ def parse_stats(files):
     return stats
 
 
+# ------------------------------------------------------- playable positions
+# A position the champion plays but has no games in this window shows "Not enough
+# data" instead of a win/loss block, so it produces no meta rows at all - and the
+# position itself used to vanish with them. The game states it twice more, and
+# both are already on disk: the icon row under the champion name has exactly one
+# icon per playable position, and the Meta tab's selector draws playable icons
+# lit (~227) against greyed-out ones (~125). Neither needs a re-capture.
+ROLE_STRIP_ENABLED_MAX = 180        # keep in sync with esmo_capture.ROLE_ENABLED_MAX
+
+
+def header_role_count(files):
+    """How many position icons sit under the champion name."""
+    best = 0
+    for f in files:
+        try:
+            root = ET.fromstring(pathlib.Path(f).read_text(encoding="utf-8"))
+        except (ET.ParseError, OSError):
+            continue
+        n = 0
+        for nd in root.iter("node"):
+            if not (nd.get("class") or "").endswith("ImageView"):
+                continue
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", nd.get("bounds") or "")
+            if m:
+                x1, y1, x2, y2 = map(int, m.groups())
+                if 190 <= y1 <= 210 and y2 - y1 < 40:
+                    n += 1
+        best = max(best, n)
+    return best
+
+
+def strip_roles(png, expect):
+    """Playable positions read from the saved position-selector crop.
+
+    Returns None when it cannot be trusted. The strip is one frame: an unstyled
+    one paints every icon lit, which would invent positions. `expect` (the header
+    icon count) is the independent second opinion - if the two disagree, say
+    nothing rather than guess.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        im = Image.open(png).convert("L")
+    except OSError:
+        return None
+    w = im.width / len(ROLE_ORDER)
+    roles = [ROLE_ORDER[i] for i in range(len(ROLE_ORDER))
+             if im.crop((int(i * w), 0, int((i + 1) * w), im.height)).getextrema()[1]
+             >= ROLE_STRIP_ENABLED_MAX]
+    return roles if roles and len(roles) == expect else None
+
+
 # ---------------------------------------------------------------- driver
 def main():
     ap = argparse.ArgumentParser()
@@ -333,17 +387,26 @@ def main():
 
     # captured.json records the order positions were visited in, which is what
     # makes the duplicate-position repair unambiguous.
-    capture_order = {}
+    capture_order, meta_attempted = {}, {}
     cj = root / "captured.json"
     if cj.exists():
         try:
             for c in json.loads(cj.read_text(encoding="utf-8"))["champions"]:
                 if c.get("roles"):
                     capture_order[c["dir"]] = c["roles"]
+                # Whether the Meta tab was opened at all this run. A champion with
+                # no games anywhere leaves no meta files, and the saved position
+                # strip is the only record that it has positions - but on a
+                # --no-meta run that strip is a leftover from an earlier capture
+                # and must not be read as current.
+                meta_attempted[c["dir"]] = (
+                    any(k.startswith("meta") for k in (c.get("files") or {}))
+                    or "meta" in (c.get("incomplete") or []))
         except (ValueError, KeyError):
             pass
 
     champions, problems, dropped_positions = [], [], []
+    recovered_positions, unreadable_strips = [], []
     stale_files = []
     for cdir in sorted(raw.iterdir()):
         if not cdir.is_dir():
@@ -394,12 +457,29 @@ def main():
             seen_samples[fp] = role
             positions.append({"position": role, **pm})
 
+        # Positions the champion plays that had no games in this window: keep the
+        # position, with null numbers and a no_data flag so nothing reads them as
+        # a real sample.
+        strip = root / "portraits" / f"_rolestrip_{cdir.name}.png"
+        if meta_attempted.get(cdir.name, bool(by_role or legacy)) and strip.exists():
+            played = strip_roles(strip, header_role_count(ov))
+            if played is None:
+                unreadable_strips.append(cdir.name)
+            else:
+                have = {p["position"] for p in positions}
+                for role in played:
+                    if role not in have:
+                        positions.append({"position": role, **parse_meta([]),
+                                          "no_data": True})
+                        recovered_positions.append(f"{cdir.name}: {role}")
+
         positions.sort(key=lambda p: ROLE_ORDER.index(p["position"])
                        if p["position"] in ROLE_ORDER else 99)
         entry["positions"] = positions
+        with_data = [p for p in positions if p.get("win_rate") is not None]
         entry["meta"] = parse_meta(legacy) if legacy else (
-            {k: v for k, v in positions[0].items() if k != "position"}
-            if positions else parse_meta([]))
+            {k: v for k, v in with_data[0].items() if k not in ("position", "no_data")}
+            if with_data else parse_meta([]))
         entry["stats"] = parse_stats(st)
 
         p = root / "portraits" / f"{cdir.name}.png"
@@ -443,7 +523,8 @@ def main():
             merged.append(c["name"])
 
     for c in champions:
-        c["has_meta"] = bool(c["positions"])
+        # A position with no games is still a known position, but not meta.
+        c["has_meta"] = any(p.get("win_rate") is not None for p in c["positions"])
 
     payload = {
         "source": "ESMO in-game capture",
@@ -487,7 +568,7 @@ def main():
                 for c in champions:
                     before = len(c["positions"])
                     c["positions"] = [p for p in c["positions"]
-                                      if p.get("period") == keep]
+                                      if p.get("period") in (keep, None)]
                     if len(c["positions"]) != before:
                         culled.append(c["name"])
                 print(f"  --strict-period: kept only {keep!r}; "
@@ -509,6 +590,16 @@ def main():
         print(f"    {', '.join(chs)}")
         print("    (delete esmo_capture/ before a fresh full run, or re-capture "
               "those champions, to clear them from disk)")
+
+    if recovered_positions:
+        print(f"\n  {len(recovered_positions)} position(s) with no games in this "
+              f"window (kept, no_data=true):")
+        for line in recovered_positions:
+            print(f"    {line}")
+    if unreadable_strips:
+        print(f"\n  could not read the position selector for "
+              f"{len(unreadable_strips)} champion(s): {', '.join(unreadable_strips)}")
+        print("    (a position they play but have no games in may be missing)")
 
     if dropped_positions:
         print(f"\n  dropped {len(dropped_positions)} phantom position(s):")

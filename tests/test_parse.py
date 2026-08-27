@@ -117,3 +117,101 @@ def test_overview_of_an_unreadable_dump_is_empty(tmp_path):
     broken.write_text("<hierarchy><node content-desc=", encoding="utf-8")
     assert pe.nodes_of(broken) == []
     assert pe.parse_overview([broken])["abilities"] == []
+
+
+# ------------------------------------------------- positions with no games
+# A position the champion plays but has no games in during the capture window
+# renders "Not enough data": no win block, so no meta rows and (before this) no
+# position either. The position is recovered from the saved selector strip,
+# cross-checked against the icon count under the champion name.
+def write_header(path, icons, *descs):
+    """Dump with `icons` position icons under the name, then normal nodes."""
+    head = "".join(
+        f'<node class="android.widget.ImageView" content-desc="" '
+        f'bounds="[{959 + i * 30},198][{986 + i * 30},225]" />'
+        for i in range(icons))
+    write_dump(path, *descs)
+    path.write_text(path.read_text(encoding="utf-8").replace(
+        '<hierarchy rotation="0">', f'<hierarchy rotation="0">{head}'), encoding="utf-8")
+    return path
+
+
+def write_strip(path, enabled):
+    """The selector crop: playable icons peak at 227, greyed-out ones at 125."""
+    from PIL import Image
+    im = Image.new("L", (540, 72), 0)
+    for i, on in enumerate(enabled):
+        im.paste(227 if on else 125, (i * 108 + 20, 20, i * 108 + 80, 52))
+    im.save(path)
+    return path
+
+
+WINBLOCK = "20.0%\n2W 8L · 10 games\nKDA\n1.27"
+
+
+def build_capture(tmp_path, name, icons, enabled, meta_roles=(), meta_attempted=True):
+    raw = tmp_path / "raw" / name
+    raw.mkdir(parents=True)
+    (tmp_path / "portraits").mkdir(exist_ok=True)
+    write_header(raw / "overview_00.xml", icons, "Ranged", "Magic")
+    files = {"overview": ["overview_00.xml"]}
+    for i, role in enumerate(meta_roles):
+        # Distinct samples per role - two identical ones mean the tap was ignored,
+        # and the parser drops the duplicate as a position that is not played.
+        write_dump(raw / f"meta_{role}_00.xml", "Aug 26 - Aug 27",
+                   "Pick rate\n0.6%\nBan rate\n2.6%",
+                   WINBLOCK.replace("2W 8L · 10", f"{2 + i}W 8L · {10 + i}"))
+        files[f"meta_{role}"] = [f"meta_{role}_00.xml"]
+    write_strip(tmp_path / "portraits" / f"_rolestrip_{name}.png", enabled)
+    (tmp_path / "captured.json").write_text(json.dumps({"champions": [{
+        "name": name, "dir": name, "files": files, "roles": list(meta_roles),
+        "incomplete": [] if meta_roles or not meta_attempted else ["meta"],
+    }]}), encoding="utf-8")
+    return tmp_path
+
+
+def run_parser(capture_dir):
+    import subprocess
+    out = capture_dir / "champions.json"
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "parse_esmo.py"),
+                    "--dir", str(capture_dir), "--out", str(out)],
+                   check=True, stdout=subprocess.DEVNULL)
+    return json.loads(out.read_text(encoding="utf-8"))["champions"][0]
+
+
+def test_position_without_games_is_kept_with_null_numbers(tmp_path):
+    """Widow: one position, no games in the window, so no meta files at all."""
+    champ = run_parser(build_capture(tmp_path, "Widow", 1,
+                                     [False, True, False, False, False]))
+    assert [p["position"] for p in champ["positions"]] == ["Jungle"]
+    assert champ["positions"][0]["no_data"] is True
+    assert champ["positions"][0]["win_rate"] is None
+    assert champ["has_meta"] is False       # a known position is not a sample
+
+
+def test_empty_position_joins_the_one_that_had_data(tmp_path):
+    """Pixie: Support played, Top playable but empty."""
+    champ = run_parser(build_capture(tmp_path, "Pixie", 2,
+                                     [True, False, False, False, True],
+                                     meta_roles=["Support"]))
+    got = {p["position"]: p for p in champ["positions"]}
+    assert sorted(got) == ["Support", "Top"]
+    assert got["Top"]["no_data"] is True
+    assert got["Support"].get("no_data") is None and got["Support"]["win_rate"] == 20.0
+    assert champ["meta"]["win_rate"] == 20.0    # meta still comes from real data
+    assert champ["has_meta"] is True
+
+
+def test_an_unstyled_selector_frame_invents_nothing(tmp_path):
+    """One bad frame paints every icon lit; the header icon count vetoes it."""
+    champ = run_parser(build_capture(tmp_path, "Sentinel", 2, [True] * 5,
+                                     meta_roles=["Top", "Support"]))
+    assert sorted(p["position"] for p in champ["positions"]) == ["Support", "Top"]
+
+
+def test_a_leftover_strip_is_ignored_when_meta_was_not_captured(tmp_path):
+    """--no-meta never opens the Meta tab, so the strip on disk is last run's."""
+    champ = run_parser(build_capture(tmp_path, "Widow", 1,
+                                     [False, True, False, False, False],
+                                     meta_attempted=False))
+    assert champ["positions"] == []
