@@ -16,10 +16,10 @@ def test_preset_flags_come_first_then_passthrough():
 
 
 def test_parse_reads_the_folder_capture_writes_to():
-    """esmo_capture.py writes beside itself, so the parser must be pointed at it."""
+    """Capture writes ./esmo_capture; the parse step must read that same folder."""
     _, parse = esmo.commands("weekly", [], ".", "20260827")
     assert parse[parse.index("--dir") + 1] == str(esmo.CAPTURE_DIR)
-    assert esmo.CAPTURE_DIR.parent == esmo.CAPTURE.parent
+    assert esmo.CAPTURE_DIR == pathlib.Path.cwd() / "esmo_capture"
 
 
 def test_output_is_datestamped_in_the_out_dir(tmp_path):

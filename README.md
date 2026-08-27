@@ -190,6 +190,8 @@ python scripts/esmo_capture.py [options]
 
 ### Output
 
+Written to the directory you run from, so `cd` to wherever you keep captures first.
+
 ```
 esmo_capture/
 ├── raw/<Champion>/

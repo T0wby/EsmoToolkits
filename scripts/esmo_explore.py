@@ -46,8 +46,10 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 
-HERE = pathlib.Path(__file__).resolve().parent
-OUT = HERE / "esmo_explore"
+# Output lands in the directory you run from, not beside the script: an installed
+# copy lives in site-packages, which is no place for capture data.
+OUT_ROOT = pathlib.Path.cwd()
+OUT = OUT_ROOT / "esmo_explore"
 PACKAGE = "gg.esmo"
 
 CANDIDATE_PORTS = [5555, 5556, 5557, 5565, 5575, 5585,
@@ -315,7 +317,7 @@ def main():
             s.snap()
 
     if s.i:
-        zpath = HERE / "esmo_explore.zip"
+        zpath = OUT_ROOT / "esmo_explore.zip"
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
             for f in sorted(OUT.iterdir()):
                 zf.write(f, f.name)

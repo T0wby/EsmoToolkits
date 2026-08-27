@@ -119,8 +119,10 @@ PORTRAIT_BOX = (815, 144, 935, 264)           # champion art on the detail heade
 MAX_SCROLLS = 10
 PACKAGE = "gg.esmo"
 
-HERE = pathlib.Path(__file__).resolve().parent
-OUT = HERE / "esmo_capture"
+# Output lands in the directory you run from, not beside the script: an installed
+# copy lives in site-packages, which is no place for capture data.
+OUT_ROOT = pathlib.Path.cwd()
+OUT = OUT_ROOT / "esmo_capture"
 
 CANDIDATE_PORTS = [5555, 5556, 5557, 5565, 5575, 5585,
                    62001, 62025, 62026, 21503, 21513]
@@ -565,7 +567,7 @@ def probe_roles(adb, method):
     dumps, so the placeholder->live swap timing and the look of an unplayed
     position can both be measured instead of guessed.
     """
-    out = HERE / "esmo_roleprobe"
+    out = OUT_ROOT / "esmo_roleprobe"
     if out.exists():
         shutil.rmtree(out)
     out.mkdir()
@@ -608,7 +610,7 @@ def probe_roles(adb, method):
     (out / "log.txt").write_text(f"champion: {champ}\n" + "\n".join(log),
                                  encoding="utf-8")
 
-    zpath = HERE / "esmo_roleprobe.zip"
+    zpath = OUT_ROOT / "esmo_roleprobe.zip"
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
         for f in sorted(out.iterdir()):
             zf.write(f, f.name)
@@ -739,7 +741,7 @@ def probe_filter(adb, method):
     when you open a different champion - which decides whether the capture sets the
     filter once per run or once per champion.
     """
-    out = HERE / "esmo_filterprobe"
+    out = OUT_ROOT / "esmo_filterprobe"
     if out.exists():
         shutil.rmtree(out)
     out.mkdir()
@@ -823,7 +825,7 @@ def probe_filter(adb, method):
             f"other: {other} -> {other_range}\nverdict: {verdict}\n",
             encoding="utf-8")
 
-    zpath = HERE / "esmo_filterprobe.zip"
+    zpath = OUT_ROOT / "esmo_filterprobe.zip"
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
         for f in sorted(out.iterdir()):
             zf.write(f, f.name)
@@ -1192,7 +1194,7 @@ def main():
         print("all tabs scrolled to the end cleanly")
 
     if not args.no_zip and captured:
-        zpath = HERE / "esmo_capture.zip"
+        zpath = OUT_ROOT / "esmo_capture.zip"
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
             for f in OUT.rglob("*"):
                 if f.is_file() and f.suffix.lower() != ".apk":

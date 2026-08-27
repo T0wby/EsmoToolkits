@@ -25,8 +25,8 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 CAPTURE = HERE / "esmo_capture.py"
 PARSE = HERE / "parse_esmo.py"
-# esmo_capture.py writes next to itself, not to the current directory
-CAPTURE_DIR = HERE / "esmo_capture"
+# both scripts anchor their output at the working directory
+CAPTURE_DIR = pathlib.Path.cwd() / "esmo_capture"
 
 PRESETS = {
     "weekly":  ["--range", "7d", "--resume", "--scroll-method", "pagekeys"],
