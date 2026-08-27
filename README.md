@@ -19,13 +19,15 @@ EsmoToolkits/
 ├── docs/
 │   └── EXTRACTION-GUIDE.md        how the technique works, and how to extend it
 ├── scripts/
+│   ├── esmo.py                    preset launcher - capture and parse in one step
 │   ├── esmo_capture.py            walks the champion roster, saves raw dumps
 │   ├── parse_esmo.py              turns raw dumps into champions.json
 │   └── esmo_explore.py            maps any other page in the game
 ├── examples/
 │   └── champions.sample.json      2 champions, so you can see the output shape
 └── tests/
-    └── test_parse.py              offline parser checks - no emulator needed
+    ├── test_parse.py              offline parser checks - no emulator needed
+    └── test_launcher.py           preset launcher checks
 ```
 
 ---
@@ -116,6 +118,37 @@ python scripts/parse_esmo.py                 # champions.json, seconds
 
 Always run the `--limit 3` check first. Confirm each champion prints sensible positions and
 a `date range applied:` line before committing three hours.
+
+### Presets
+
+`esmo.py` runs a capture and parses it in one step, with the flag combinations worth
+remembering. It writes `YYYYMMDD_champions.json`, so repeated runs never overwrite
+each other.
+
+```powershell
+python scripts/esmo.py list                  # what each preset runs
+python scripts/esmo.py weekly                # capture + parse, 7-day meta
+python scripts/esmo.py weekly --out-dir C:\captures
+python scripts/esmo.py                       # pick from a menu
+```
+
+| Preset | Capture flags |
+| --- | --- |
+| `weekly` | `--range 7d --resume --scroll-method pagekeys` |
+| `daily` | `--range 24h --resume --scroll-method pagekeys` |
+| `monthly` | `--range 28d --resume --scroll-method pagekeys` |
+| `quick` | `--no-meta --resume --scroll-method pagekeys` |
+| `fresh` | `--range 7d --scroll-method pagekeys` |
+
+Anything after the preset is passed straight to `esmo_capture.py`, so one-offs still work:
+
+```powershell
+python scripts/esmo.py weekly --redo Brewer,Nomad
+python scripts/esmo.py weekly --port 5555 --limit 3
+python scripts/esmo.py weekly -n             # print the commands, run nothing
+```
+
+Add your own by editing `PRESETS` at the top of [scripts/esmo.py](scripts/esmo.py).
 
 ---
 
