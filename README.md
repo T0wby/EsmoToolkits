@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/T0wby/EsmoToolkits/actions/workflows/ci.yml/badge.svg)](https://github.com/T0wby/EsmoToolkits/actions/workflows/ci.yml)
 
-Extracts champion data from **ESMO: Esports Manager Online** — abilities, base stats, live
-win rates, matchups and portraits — into structured JSON.
+Extracts champion data from **ESMO: Esports Manager Online** - abilities, base stats, live
+win rates, matchups and portraits - into structured JSON.
 
 ESMO is a mobile-only game with no public API. This toolkit runs the app in an Android
 emulator and reads its **accessibility tree**, which Flutter apps publish in full. That
@@ -13,9 +13,9 @@ Built and validated against **app v1.1.4**, 72 champions, 105 champion-positions
 
 ```
 EsmoToolkits/
-├── README.md                      this file — setup, per-script guides, data schema
+├── README.md                      this file - setup, per-script guides, data schema
 ├── requirements.txt
-├── pyproject.toml                 packaging — `pip install .` for the esmo-* commands
+├── pyproject.toml                 packaging - `pip install .` for the esmo-* commands
 ├── docs/
 │   └── EXTRACTION-GUIDE.md        how the technique works, and how to extend it
 ├── scripts/
@@ -25,7 +25,7 @@ EsmoToolkits/
 ├── examples/
 │   └── champions.sample.json      2 champions, so you can see the output shape
 └── tests/
-    └── test_parse.py              offline parser checks — no emulator needed
+    └── test_parse.py              offline parser checks - no emulator needed
 ```
 
 ---
@@ -50,11 +50,11 @@ EsmoToolkits/
 
 Per champion:
 
-- **Identity** — name, class, class description, attack type, damage type, portrait
-- **Base stats** — ~24 values: health, resource, attack damage, auto-attack timings,
+- **Identity** - name, class, class description, attack type, damage type, portrait
+- **Base stats** - ~24 values: health, resource, attack damage, auto-attack timings,
   ability power, crit, armor, magic resist, penetration, tenacity, lifesteal, move speed
-- **Abilities** — all four (Q/W/E/R) with targeting type, scaling, effects, cooldown, range
-- **Per position** — champions play up to three positions, each with its own:
+- **Abilities** - all four (Q/W/E/R) with targeting type, scaling, effects, cooldown, range
+- **Per position** - champions play up to three positions, each with its own:
   pick/ban/win rate, W/L, games, KDA, gold/CS/damage per minute, vision,
   and best/worst matchups with win rate and sample size
 
@@ -66,13 +66,13 @@ A full run produces 72 champions · 288 abilities · 1728 stat values · ~106 po
 ## 2. Setup
 
 **1. BlueStacks 5**, with ESMO installed and logged in.
-Set the instance to **1920×1080** — every coordinate in these scripts was measured there,
+Set the instance to **1920×1080** - every coordinate in these scripts was measured there,
 and the capture script warns you if it isn't.
 
 **2. Enable ADB**: BlueStacks Settings → Advanced → **Android Debug Bridge**. Note the
 address it shows (e.g. `127.0.0.1:5555`); newer builds randomise the port.
 
-**3. adb** — either [Android platform-tools](https://developer.android.com/tools/releases/platform-tools)
+**3. adb** - either [Android platform-tools](https://developer.android.com/tools/releases/platform-tools)
 unzipped somewhere permanent, or BlueStacks' own copy at
 `C:\Program Files\BlueStacks_nxt\HD-Adb.exe`. The scripts find either automatically.
 
@@ -82,7 +82,7 @@ unzipped somewhere permanent, or BlueStacks' own copy at
 pip install -r requirements.txt      # Pillow, for portrait cropping and icon-state reading
 ```
 
-Pillow is optional — without it you lose portraits and position detection falls back to a
+Pillow is optional - without it you lose portraits and position detection falls back to a
 less reliable method. Install it.
 
 Or install the toolkit itself, which pulls in Pillow and adds the commands
@@ -94,7 +94,7 @@ pip install .          # add -e for an editable install
 
 Every `python scripts/x.py` below then also works as the matching command.
 
-The parser has offline tests that need no emulator — `pip install -e ".[dev]"`, then
+The parser has offline tests that need no emulator - `pip install -e ".[dev]"`, then
 `ruff check .` and `pytest -q`. CI runs both on 3.9 and 3.13.
 
 **While a capture runs:** leave the BlueStacks window **restored, not minimised**. Input
@@ -122,7 +122,7 @@ a `date range applied:` line before committing three hours.
 ## 4. `esmo_capture.py`
 
 Walks every champion and saves the **raw accessibility dumps**. It deliberately does no
-parsing — that is `parse_esmo.py`'s job, so a parsing mistake never costs another capture.
+parsing - that is `parse_esmo.py`'s job, so a parsing mistake never costs another capture.
 
 ### How it works
 
@@ -145,7 +145,7 @@ python scripts/esmo_capture.py [options]
 | `--redo NAMES` | – | Comma-separated champions to re-capture from scratch; their existing data is deleted first |
 | `--limit N` | – | Stop after N champions |
 | `--phase {top,bottom,both}` | `both` | Which grid scroll position to walk. `bottom` reaches the last rows without re-walking the first |
-| `--no-meta` | off | Skip the Meta tab entirely — abilities, stats and portraits only (~15 min) |
+| `--no-meta` | off | Skip the Meta tab entirely - abilities, stats and portraits only (~15 min) |
 | `--no-roles` | off | Capture only the default position, not all of them |
 | `--pull-apk` | off | Also pull the app's APKs (for full-resolution art) |
 | `--scroll-method NAME` | auto | Force a scroll gesture. `pagekeys` is the one that works |
@@ -182,7 +182,7 @@ Champion number · dumps per tab · positions found · elapsed. Anything appende
 
 | Marker | Meaning |
 |---|---|
-| `date-range` | The date filter didn't apply — that champion is in the wrong window |
+| `date-range` | The date filter didn't apply - that champion is in the wrong window |
 | `meta:<Position>` | That position's tab didn't scroll to the end |
 | `roles-unverified` | The position selector couldn't be read (usually a minimised window) |
 
@@ -190,8 +190,8 @@ At the end it lists affected champions and prints a ready-made `--redo` command.
 
 ### Resume and redo
 
-`--resume` skips a champion only when what's on disk **covers what the current run wants**
-— so a `--no-meta` pass followed by a full pass correctly re-visits everything, instead of
+`--resume` skips a champion only when what's on disk **covers what the current run wants**,
+so a `--no-meta` pass followed by a full pass correctly re-visits everything, instead of
 seeing the name and calling it done.
 
 `captured.json` also stores which champion sits in which grid cell, so later resumes skip
@@ -202,8 +202,8 @@ abandoned if the roster has shifted.
 
 ## 5. `parse_esmo.py`
 
-Converts a capture folder into `champions.json`. Runs entirely offline, so re-run it freely
-— if parsing needs fixing, that's seconds rather than another three-hour walk.
+Converts a capture folder into `champions.json`. Runs entirely offline, so re-run it freely:
+if parsing needs fixing, that's seconds rather than another three-hour walk.
 
 ```powershell
 python scripts/parse_esmo.py [options]
@@ -228,7 +228,7 @@ parsed 72 champions -> champions.json
 
 Checks worth making every time:
 
-- **One date range only.** Two entries means mixed windows and it says so explicitly —
+- **One date range only.** Two entries means mixed windows and it says so explicitly -
   those rows are not comparable to each other.
 - **`abilities` = 4 × champion count.** Anything less means a truncated Overview tab.
 - **`positions` ≈ 106** for a full roster.
@@ -246,7 +246,7 @@ defends against each:
   as the win rate, so the two can't be mixed.
 - **Phantom positions.** Tapping a position a champion can't play does nothing, leaving the
   previous position's data on screen. Positions whose W/L/games exactly duplicate an earlier
-  one are dropped — the first occurrence is the real one.
+  one are dropped - the first occurrence is the real one.
 - **Stale files.** `captured.json` is the authority on which positions exist; files for
   anything else are leftovers from an earlier run and are ignored.
 - **Section-scoped stats.** `ARMOR/Armor` and `PENETRATION/Armor` are different values with
@@ -256,7 +256,7 @@ defends against each:
 
 ## 6. `esmo_explore.py`
 
-Maps **any** page in the game. Use it to extend this toolkit beyond champions — Items,
+Maps **any** page in the game. Use it to extend this toolkit beyond champions - Items,
 Draft, Strategies, Competitions, team and player pages are all unmapped.
 
 Navigate to a page in BlueStacks, then:
@@ -310,11 +310,11 @@ Per champion:
 | Field | Type | Description |
 |---|---|---|
 | `name` | string | e.g. `"Automata"` |
-| `class` | string | e.g. `"Battle Mage"` — 12 distinct classes |
+| `class` | string | e.g. `"Battle Mage"` - 12 distinct classes |
 | `class_description` | string | The class's in-game description |
 | `attack_type` | string | `"Ranged"` or `"Melee"` |
 | `damage_type` | string | `"Magic"`, `"Physical"`, `"Mixed"`, `"True"` |
-| `base_health` | string | e.g. `"694 (+120/lvl)"` — kept as the game formats it |
+| `base_health` | string | e.g. `"694 (+120/lvl)"` - kept as the game formats it |
 | `base_resource` | string \| null | Null for resourceless champions |
 | `resource_type` | string \| null | e.g. `"Mana"` |
 | `abilities` | array | Four entries, Q/W/E/R |
@@ -347,7 +347,7 @@ Position:
 | `win_rate` | number | Percent |
 | `wins`, `losses`, `games` | int | Sample size |
 | `kda`, `gold_per_min`, `cs_per_min`, `damage_per_min`, `vision_per_game` | number | Averages |
-| `best_matchups`, `worst_matchups` | array | `{opponent, win_rate, games}` — counts vary, sometimes zero |
+| `best_matchups`, `worst_matchups` | array | `{opponent, win_rate, games}` - counts vary, sometimes zero |
 | `sample_warning` | string | Present if more than one sample size was seen |
 
 Numbers with per-level scaling stay as strings (`"694 (+120/lvl)"`) rather than being split,
@@ -357,7 +357,7 @@ so nothing is lost to a parsing assumption. Split them downstream if you need to
 
 ## 8. Common workflows
 
-**Weekly refresh.** Keep the folders separate — one window per folder.
+**Weekly refresh.** Keep the folders separate - one window per folder.
 
 ```powershell
 Rename-Item esmo_capture esmo_capture_lastweek
@@ -377,7 +377,7 @@ python scripts/parse_esmo.py --dir esmo_capture_7d  --out champions_7d.json
 ```
 
 Weekly samples run roughly a quarter of monthly. Suppress trend deltas below ~100 games and
-hide matchups below ~20 — a 3-0 matchup reads as 100% and means nothing.
+hide matchups below ~20 - a 3-0 matchup reads as 100% and means nothing.
 
 **Fast static refresh** after a balance patch, when only abilities and stats changed:
 
@@ -396,42 +396,42 @@ older meta is never mistaken for fresh.
 python scripts/esmo_capture.py --resume --redo Brewer,Nomad,Volt
 ```
 
-`--redo` implies `--resume` — the named champions are re-walked and the rest of the
+`--redo` implies `--resume` - the named champions are re-walked and the rest of the
 roster is skipped. Match `--range` to the folder you're patching.
 
 ---
 
 ## 9. Troubleshooting
 
-**"No adb device"** — BlueStacks isn't running, or ADB isn't enabled in its settings. Pass
+**"No adb device"** - BlueStacks isn't running, or ADB isn't enabled in its settings. Pass
 the port explicitly: `--port 5555`.
 
-**"Could not find adb"** — pass it: `--adb "C:\platform-tools\adb.exe"`.
+**"Could not find adb"** - pass it: `--adb "C:\platform-tools\adb.exe"`.
 
-**Every scroll gesture reports "no effect"** — this is expected for the swipe variants;
-`pagekeys` should report `MOVED`. If *nothing* moves, the emulator isn't receiving input —
+**Every scroll gesture reports "no effect"** - this is expected for the swipe variants;
+`pagekeys` should report `MOVED`. If *nothing* moves, the emulator isn't receiving input -
 check BlueStacks is at 1920×1080 and ESMO is in the foreground.
 
-**"The emulator is returning a blank/dark frame"** — the window is minimised. Restore it.
+**"The emulator is returning a blank/dark frame"** - the window is minimised. Restore it.
 It doesn't need focus.
 
-**Champions captured in the wrong date window** — the run prints the affected names and a
+**Champions captured in the wrong date window** - the run prints the affected names and a
 `--redo` command. Re-run that.
 
-**Parser says "MIXED WINDOWS"** — the folder holds two capture dates. Either use
+**Parser says "MIXED WINDOWS"** - the folder holds two capture dates. Either use
 `--strict-period` to keep only the majority, or `--redo` the odd ones.
 
-**A run stops short of 72 champions** — the grid didn't scroll. The script now reports this
+**A run stops short of 72 champions** - the grid didn't scroll. The script now reports this
 rather than finishing quietly; re-run with `--resume --phase bottom`.
 
 ---
 
 ## 10. Limitations
 
-**Not extractable — these are pixels, not text:**
+**Not extractable - these are pixels, not text:**
 
 - Champion art and role icons (screenshot crops, or `--pull-apk` for the bundled originals)
-- The **early-game advantages chart** — its accessibility label gives the axes
+- The **early-game advantages chart** - its accessibility label gives the axes
   (`0m…20m`, `Gold`, `CS`, `XP`) but no plotted values
 
 **Fragile to app updates.** Coordinates were measured on v1.1.4 at 1920×1080. A UI redesign
@@ -439,7 +439,7 @@ means re-mapping with `esmo_explore.py`. Text-labelled controls are matched by t
 and survive layout changes; icon-only controls are not.
 
 **Timing-dependent.** The Meta tab loads asynchronously and the toolkit waits for it. On a
-slow machine or connection, expect longer runs rather than wrong data — the checks are built
+slow machine or connection, expect longer runs rather than wrong data - the checks are built
 to fail loudly, not silently.
 
 **Pick and ban rate appear to be champion-level**, not position-level: a champion reports
@@ -456,7 +456,7 @@ It does what a person clicking through the app would do, unattended.
 
 That said, **automated extraction may not be permitted by ESMO's terms of service**, and the
 developers have not been asked. If you plan to publish or share data produced with this,
-ask them first — their Discord is linked from [esmo.gg](https://esmo.gg/). A studio-provided
+ask them first - their Discord is linked from [esmo.gg](https://esmo.gg/). A studio-provided
 export would be better than this toolkit in every respect: no emulator, no coordinates, and
 it stays correct across patches.
 
