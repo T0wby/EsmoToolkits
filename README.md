@@ -342,6 +342,10 @@ defends against each:
   one are dropped - the first occurrence is the real one.
 - **Stale files.** `captured.json` is the authority on which positions exist; files for
   anything else are leftovers from an earlier run and are ignored.
+- **Positions with no games.** A position with no games in the window shows "Not enough data"
+  and produces no rows at all. The position is recovered from the saved selector strip, cross
+  checked against the icon count under the champion name, and kept with `no_data: true`. If
+  the two disagree the parser says nothing and names the champion instead of guessing.
 - **Section-scoped stats.** `ARMOR/Armor` and `PENETRATION/Armor` are different values with
   the same label, so stat keys are scoped by their section header.
 
@@ -411,11 +415,11 @@ Per champion:
 | `base_resource` | string \| null | Null for resourceless champions |
 | `resource_type` | string \| null | e.g. `"Mana"` |
 | `abilities` | array | Four entries, Q/W/E/R |
-| `positions` | array | One entry per position played (0–3) |
-| `meta` | object | Same shape as a position entry; mirrors the first position |
+| `positions` | array | One entry per position played (0–3), including any with no games in the window |
+| `meta` | object | Same shape as a position entry; mirrors the first position that has numbers |
 | `stats` | object | Section → label → value |
 | `portrait` | string \| null | Relative path to the crop |
-| `has_meta` | bool | False after a `--no-meta` capture |
+| `has_meta` | bool | False after a `--no-meta` capture, or when no position has a sample |
 | `meta_source` | string | Present only when filled via `--merge` |
 
 Ability:
@@ -442,6 +446,7 @@ Position:
 | `kda`, `gold_per_min`, `cs_per_min`, `damage_per_min`, `vision_per_game` | number | Averages |
 | `best_matchups`, `worst_matchups` | array | `{opponent, win_rate, games}` - counts vary, sometimes zero |
 | `sample_warning` | string | Present if more than one sample size was seen |
+| `no_data` | bool | Present only when true: the champion plays this position but had no games in the window, so every number above is null |
 
 Numbers with per-level scaling stay as strings (`"694 (+120/lvl)"`) rather than being split,
 so nothing is lost to a parsing assumption. Split them downstream if you need to.
