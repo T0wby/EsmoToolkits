@@ -118,8 +118,15 @@ def dump_xml(adb):
             time.sleep(1.0)
             continue
         rc, xml, _ = adb.shell("cat", "/sdcard/esmo_ui.xml", timeout=60)
-        if xml and xml.strip().startswith("<?xml"):
-            return xml
+        # adb writes its own chatter to STDOUT, not stderr ("* daemon started
+        # successfully *", and the version-mismatch banner when a second adb owns
+        # the server), so it lands in front of the XML. Slice from the declaration
+        # instead of demanding the payload start there - requiring startswith made
+        # every dump return None and the caller report "no text nodes", which reads
+        # as "this screen has no accessibility tree" and is a lie.
+        start = xml.find("<?xml") if xml else -1
+        if start >= 0:
+            return xml[start:]
         time.sleep(1.0)
     return None
 
