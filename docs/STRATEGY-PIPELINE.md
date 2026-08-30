@@ -117,8 +117,8 @@ Deliberately absent, add them when something needs them:
 - `Fixed duration` takes a typed number, and it is the only field in the whole editor that
   needs an `input text` primitive the toolkit does not have.
 
-Input is JSON. A `.yaml` file is accepted too, with `import yaml` done lazily so the
-dependency stays optional, the same treatment Pillow already gets in the capture path.
+Input is JSON, which is stdlib. No other input format, so the toolkit gains no dependency
+here.
 
 ## Writer contract
 
