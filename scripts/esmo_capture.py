@@ -166,19 +166,45 @@ def find_adb(explicit=None):
     found = shutil.which("adb")
     if found:
         return found
-    for g in [r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe",
-              r"C:\Program Files\BlueStacks_nxt\adb.exe",
+    # Platform-tools before BlueStacks: HD-Adb is stuck on client 1.0.36, so if
+    # anything else (Android Studio, scrcpy) owns the server on 5037 it loses the
+    # version handshake and kills/restarts the server on EVERY command - 5s per
+    # call instead of 0.01s. It talks to the BlueStacks emulator just as well.
+    for g in [pathlib.Path.home() / r"AppData\Local\Android\Sdk\platform-tools\adb.exe",
+              r"C:\Program Files (x86)\Android\android-sdk\platform-tools\adb.exe",
               r"C:\platform-tools\adb.exe",
+              r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe",
+              r"C:\Program Files\BlueStacks_nxt\adb.exe",
               "/usr/local/bin/adb", "/usr/bin/adb"]:
         if pathlib.Path(g).exists():
-            return g
+            return str(g)
     sys.exit("Could not find adb. Pass --adb <path to adb.exe>.")
+
+
+def check_server_owner(blob):
+    """Warn if another adb install owns the server. Returns True when it does.
+
+    When two adb versions fight over port 5037, every single command kills and
+    restarts the server first. That costs seconds per call, so every
+    wait_until_stable times out and the whole run reports INCOMPLETE - a walk
+    that takes 17 minutes per champion and produces nothing usable. It is also
+    where the banner that used to corrupt screencap and dump_xml comes from.
+    """
+    low = (blob or "").lower()
+    if "adb server" not in low or "killing" not in low:
+        return False
+    print("\n!! Another adb install owns the server on port 5037, so every command"
+          "\n   restarts it. Capture will be ~10x slower and will time out.")
+    print("   Fix: run `adb kill-server` from the OTHER install, or point this at"
+          "\n   it with --adb <that adb.exe> (e.g. the Android SDK platform-tools).")
+    return True
 
 
 def connect(adb, port=None):
     for p in ([port] if port else CANDIDATE_PORTS):
         adb.run("connect", f"127.0.0.1:{p}", timeout=15)
-    _, out, _ = adb.run("devices")
+    _, out, err = adb.run("devices")
+    check_server_owner(out + err)
     return [ln.split("\t")[0].strip() for ln in out.splitlines()[1:]
             if "\t" in ln and ln.split("\t")[1].strip() == "device"]
 
@@ -393,7 +419,7 @@ def role_states(png_bytes):
         out = []
         for i in range(len(ROLE_ICONS)):
             px = list(im.crop((int(x0 + i * w), y0, int(x0 + (i + 1) * w), y1))
-                      .getdata())
+                      .tobytes())
             out.append({"enabled": max(px) >= ROLE_ENABLED_MAX,
                         "mean": sum(px) / len(px)})
         return out if any(s["enabled"] for s in out) else None
@@ -409,13 +435,25 @@ def winblock_key(xml):
     return None
 
 
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
 def screencap(adb):
     rc, data, err = adb.run("exec-out", "screencap", "-p", binary=True, timeout=60)
     if rc != 0 or not data:
         return None
-    if not data.startswith(b"\x89PNG"):
+    # Same trap as dump_xml: adb writes its own chatter to STDOUT ("* daemon
+    # started successfully *", the version-mismatch banner when a second adb
+    # owns the server), so it lands in front of the PNG. Slice from the magic
+    # instead of demanding the payload start there. Some adb builds also
+    # newline-mangle a binary stream, which corrupts the magic itself - unmangle
+    # and look again before giving up. Returning a corrupt blob just moves the
+    # crash into PIL (UnidentifiedImageError), three hours into a walk.
+    i = data.find(PNG_MAGIC)
+    if i < 0:
         data = data.replace(b"\r\n", b"\n")
-    return data
+        i = data.find(PNG_MAGIC)
+    return data[i:] if i >= 0 else None
 
 
 # ---------------------------------------------------------------- capture loop
@@ -1020,11 +1058,14 @@ def main():
     # position detection. Check once up front rather than discovering it 40 minutes in.
     if have_pil:
         shot = screencap(adb)
-        if shot:
+        if not shot:
+            print("\n!! screencap returned no usable PNG - position detection will be")
+            print("   unreliable. Check `adb exec-out screencap -p` by hand.")
+        else:
             from PIL import Image
             import io
             g = Image.open(io.BytesIO(shot)).convert("L")
-            if max(g.getdata()) < 60:
+            if max(g.tobytes()) < 60:
                 print("\n!! The emulator is returning a blank/dark frame.")
                 print("   Restore the BlueStacks window (it may be minimised) and retry.")
                 print("   Position detection needs a live frame; it does NOT need focus.")

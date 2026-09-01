@@ -94,12 +94,17 @@ def find_adb(explicit=None):
         sys.exit(f"adb not found at: {explicit}")
     if shutil.which("adb"):
         return shutil.which("adb")
-    for g in [r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe",
-              r"C:\Program Files\BlueStacks_nxt\adb.exe",
+    # Platform-tools before BlueStacks - see the note in esmo_capture.find_adb:
+    # HD-Adb's 1.0.36 client restarts the server on every command when a newer
+    # adb owns it, which costs 5s per call.
+    for g in [pathlib.Path.home() / r"AppData\Local\Android\Sdk\platform-tools\adb.exe",
+              r"C:\Program Files (x86)\Android\android-sdk\platform-tools\adb.exe",
               r"C:\platform-tools\adb.exe",
+              r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe",
+              r"C:\Program Files\BlueStacks_nxt\adb.exe",
               "/usr/local/bin/adb", "/usr/bin/adb"]:
         if pathlib.Path(g).exists():
-            return g
+            return str(g)
     sys.exit("Could not find adb. Pass --adb <path>.")
 
 
@@ -158,13 +163,20 @@ def nodes_of(xml, with_empty=False):
     return out
 
 
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
 def screencap(adb):
     rc, data, _ = adb.run("exec-out", "screencap", "-p", binary=True, timeout=60)
     if rc != 0 or not data:
         return None
-    if not data.startswith(b"\x89PNG"):
+    # Same chatter trap as dump_xml - adb's banner lands on STDOUT in front of
+    # the PNG. Slice from the magic; unmangle CRLF only if that failed.
+    i = data.find(PNG_MAGIC)
+    if i < 0:
         data = data.replace(b"\r\n", b"\n")
-    return data
+        i = data.find(PNG_MAGIC)
+    return data[i:] if i >= 0 else None
 
 
 def signature(xml):

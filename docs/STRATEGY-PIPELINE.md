@@ -61,13 +61,16 @@ Cost: a Movement task is about 7 taps, a Defense task 9 to 11. A ~300 task book 
 ### The one thing that did not come back clean
 
 **The Target picker is filtered by the chosen Position.** With Position `T Spawn`, Target
-offered exactly `T Spawn` and `Tetris`, out of 63 callouts on the map. So legal
-position/target pairs cannot be derived from the callout list, and full offline validation of
-a Defense task's Target means capturing them: open the Target picker once per position, 63
-extra picker walks per map.
+offered exactly `T Spawn` and `Tetris`, out of 63 callouts on the map. So the legal
+position/target pairs are their own piece of vocabulary: they cannot be derived from the
+callout list, and without them a Defense task's Target cannot be validated offline.
 
-Worth paying. It is one-time, roughly ten minutes on the capture side, and it preserves the
-rule that the writer never touches the device with a file that can fail.
+`strat_vocabulary.json` therefore carries the pairs per map. Capture can fill them
+exhaustively by opening the Target picker once per position, 63 picker walks per map, which
+is also how they get regenerated when the game changes. A pre-populated pair table is
+allowed to stand in for that walk as long as it is spot-checked against the editor first,
+across positions with both short and long target lists, since a wrong table fails in exactly
+the way offline validation exists to prevent.
 
 Observed on the one position mapped so far: a position appears in its own Target list.
 
